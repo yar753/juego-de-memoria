@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #memoryGame {
+            display: grid;
+            grid-template-columns: repeat(3, 150px);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            width: 150px;
+            height: 150px;
+            background-color: gray; /* Color gris inicial */
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .flipped {
+            color: black;
+            border: 2px solid black;
+        }
+
+        /* Colores para cada pareja */
+        .color1.flipped { background-color: red; }
+        .color2.flipped { background-color: blue; }
+        .color3.flipped { background-color: green; }
+        .color4.flipped { background-color: purple; }
+        .color5.flipped { background-color: orange; }
+        .color6.flipped { background-color: pink; }
+
+        /* Mensaje de pareja encontrada */
+        #message {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: green;
+            display: none;
+        }
+
+        /* Botón para reiniciar el juego */
+        #resetButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #resetButton:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div id="message">¡Pareja encontrada!</div>
+<div id="memoryGame"></div>
+<button id="resetButton">Volver a jugar</button>
+
+<script>
+    const cardColors = ['color1', 'color1', 'color2', 'color2', 'color3', 'color3'];
+    let firstCard = null;
+    let secondCard = null;
+    let blockClick = false; // Evitar clics mientras se comparan cartas
+    const memoryGame = document.getElementById('memoryGame');
+    const message = document.getElementById('message');
+
+    // Función para mezclar las cartas
+    function shuffle(array) {
+        return array.sort(() => 0.5 - Math.random());
+    }
+
+    // Función para mostrar el mensaje temporalmente
+    function showMessage() {
+        message.style.display = 'block'; // Mostrar el mensaje
+        setTimeout(() => {
+            message.style.display = 'none'; // Ocultar el mensaje después de 1 segundo
+        }, 1000);
+    }
+
+    // Función para crear las cartas
+    function createCards() {
+        // Limpia el tablero antes de crear las cartas
+        memoryGame.innerHTML = '';
+
+        // Mezcla los colores para las cartas
+        const shuffledColors = shuffle(cardColors);
+
+        // Crear las cartas y añadirlas al tablero
+        shuffledColors.forEach((color, index) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.value = color;
+
+            card.addEventListener('click', function() {
+                if (blockClick || card.classList.contains('flipped')) return;
+
+                card.classList.add('flipped', color); // Voltea la carta y asigna el color
+
+                if (firstCard === null) {
+                    firstCard = card; // Asigna la primera carta
+                } else if (secondCard === null && card !== firstCard) {
+                    secondCard = card; // Asigna la segunda carta
+                    blockClick = true;
+
+                    // Compara las dos cartas
+                    setTimeout(() => {
+                        if (firstCard.dataset.value === secondCard.dataset.value) {
+                            // Las cartas coinciden, se quedan volteadas
+                            showMessage(); // Muestra el mensaje de "Pareja encontrada"
+                        } else {
+                            // Las cartas no coinciden, se vuelven a ocultar
+                            firstCard.classList.remove('flipped', firstCard.dataset.value);
+                            secondCard.classList.remove('flipped', secondCard.dataset.value);
+                        }
+                        firstCard = null;
+                        secondCard = null;
+                        blockClick = false;
+                    }, 1000);
+                }
+            });
+
+            memoryGame.appendChild(card);
+        });
+    }
+
+    // Llamar a la función para crear las cartas al cargar la página
+    createCards();
+
+    // Función para reiniciar el juego y mezclar las cartas
+    document.getElementById('resetButton').addEventListener('click', function() {
+        firstCard = null;
+        secondCard = null;
+        blockClick = false;
+        createCards(); // Vuelve a crear y mezclar las cartas
+    });
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
